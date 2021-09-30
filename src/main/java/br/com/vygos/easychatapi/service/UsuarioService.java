@@ -1,6 +1,6 @@
 package br.com.vygos.easychatapi.service;
 
-import br.com.vygos.easychatapi.controller.UsuarioOutputDTO;
+import br.com.vygos.easychatapi.domain.dto.UsuarioOutputDTO;
 import br.com.vygos.easychatapi.domain.dto.AvisosDTO;
 import br.com.vygos.easychatapi.domain.dto.ConversaDTO;
 import br.com.vygos.easychatapi.domain.dto.UsuarioDTO;
@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service

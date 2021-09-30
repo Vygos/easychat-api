@@ -1,7 +1,5 @@
 package br.com.vygos.easychatapi.domain.dto;
 
-import br.com.vygos.easychatapi.controller.UsuarioOutputDTO;
-import br.com.vygos.easychatapi.domain.entity.Usuario;
 import br.com.vygos.easychatapi.domain.enums.TipoAviso;
 import com.sun.istack.NotNull;
 import lombok.Data;

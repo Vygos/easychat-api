@@ -1,9 +1,6 @@
 package br.com.vygos.easychatapi.controller;
 
-import br.com.vygos.easychatapi.domain.dto.AvisosDTO;
-import br.com.vygos.easychatapi.domain.dto.ConversaDTO;
-import br.com.vygos.easychatapi.domain.dto.UsuarioDTO;
-import br.com.vygos.easychatapi.domain.dto.UsuarioInputDTO;
+import br.com.vygos.easychatapi.domain.dto.*;
 import br.com.vygos.easychatapi.domain.entity.Usuario;
 import br.com.vygos.easychatapi.service.UsuarioService;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package br.com.vygos.easychatapi.domain.miscellaneous;
 
-import br.com.vygos.easychatapi.controller.UsuarioOutputDTO;
+import br.com.vygos.easychatapi.domain.dto.UsuarioOutputDTO;
 import br.com.vygos.easychatapi.domain.dto.DadosPessoaisDTO;
 import br.com.vygos.easychatapi.domain.entity.Usuario;
 import org.modelmapper.AbstractConverter;

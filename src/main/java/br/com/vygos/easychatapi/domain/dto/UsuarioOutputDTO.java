@@ -1,4 +1,4 @@
-package br.com.vygos.easychatapi.controller;
+package br.com.vygos.easychatapi.domain.dto;
 
 import br.com.vygos.easychatapi.domain.dto.DadosPessoaisDTO;
 import lombok.Builder;
