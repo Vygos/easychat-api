@@ -1,0 +1,37 @@
+easychat:
+  origin: ${ORIGIN:http://localhost:3000}
+  security:
+    clientId: easychat
+    clientSecret: easychat
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: easychat
+        dialect: org.hibernate.dialect.PostgreSQL9Dialect
+  flyway:
+    url: jdbc:postgresql://localhost:5432/postgres
+    user: postgres
+    password: postgres
+    baseline-on-migrate: true
+    default-schema: easychat
+    schemas:
+      - easychat
+
+---
+logging:
+  level:
+    root: INFO
+    org:
+      flywaydb: INFO
+server:
+  servlet:
+    application-display-name: EASYCHAT-API

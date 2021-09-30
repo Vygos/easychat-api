@@ -1,0 +1,10 @@
+easychat:
+  security:
+    clientId: ${CLIENT_ID}
+    clientSecret: ${CLIENT_SECRET}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${BD_URL}
+    username: ${BD_USERNAME}
+    password: ${BD_PASSWORD}
