@@ -3,6 +3,10 @@ easychat:
   security:
     clientId: easychat
     clientSecret: easychat
+  aws:
+    access-key-id: AKIA4OK6UZBIGHGL7LUY
+    secret-key: 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
+    bucket-name: saveup-storage
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres

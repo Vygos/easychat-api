@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -28,6 +29,15 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<UsuarioDTO> cadastrar(@RequestBody @Valid UsuarioInputDTO usuario) {
         return ResponseEntity.ok(service.cadastrar(mapper.map(usuario, Usuario.class)));
+    }
+
+    @PatchMapping("{id}")
+    public ResponseEntity<UsuarioOutputDTO> atualizar(@PathVariable Long id,
+                                                      @RequestBody @Valid UsuarioOutputDTO usuarioOutputDTO) {
+
+        Usuario usuario = mapper.map(usuarioOutputDTO, Usuario.class);
+
+        return ResponseEntity.ok(service.atualizar(id, usuario));
     }
 
     @PostMapping("{id}/confirmar-amizade")
@@ -53,6 +63,11 @@ public class UsuarioController {
     @GetMapping("{id}/avisos")
     public ResponseEntity<List<AvisosDTO>> listAll(@PathVariable Long id) {
         return ResponseEntity.ok(service.listAllAvisosByIdUsuario(id));
+    }
+
+    @PostMapping("{id}/upload")
+    public ResponseEntity<String> upload(@PathVariable Long id, @RequestParam("arquivo") MultipartFile multipartFile) {
+        return ResponseEntity.ok(service.upload(id, multipartFile));
     }
 
 }

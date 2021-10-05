@@ -1,5 +1,6 @@
 package br.com.vygos.easychatapi.service;
 
+import br.com.vygos.easychatapi.EasyChatProperties;
 import br.com.vygos.easychatapi.domain.dto.UsuarioOutputDTO;
 import br.com.vygos.easychatapi.domain.dto.AvisosDTO;
 import br.com.vygos.easychatapi.domain.dto.ConversaDTO;
@@ -10,7 +11,14 @@ import br.com.vygos.easychatapi.domain.entity.DadosPessoais;
 import br.com.vygos.easychatapi.domain.entity.Usuario;
 import br.com.vygos.easychatapi.handler.NegocioException;
 import br.com.vygos.easychatapi.repository.UsuarioRepository;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Example;
@@ -20,8 +28,13 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +46,8 @@ public class UsuarioService {
     private final ConversaService conversaService;
     private final ModelMapper modelMapper;
     private final AvisosService avisosService;
+    private final AmazonS3 amazonS3;
+    private final EasyChatProperties easyChatProperties;
 
     private final SimpMessagingTemplate template;
 
@@ -51,6 +66,24 @@ public class UsuarioService {
         usuario.getDadosPessoais().setDtCadastro(LocalDateTime.now());
 
         return modelMapper.map(usuarioRepository.save(usuario), UsuarioDTO.class);
+    }
+
+    @Transactional
+    public UsuarioOutputDTO atualizar(Long id, Usuario usuario) {
+
+        if (!id.equals(usuario.getId())) {
+            throw new NegocioException(HttpStatus.BAD_REQUEST, "ID's divergentes");
+        }
+
+        Usuario usuarioBD = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NegocioException(HttpStatus.NOT_FOUND));
+
+        usuario.setPassword(usuarioBD.getPassword());
+        usuario.getDadosPessoais().setDtCadastro(usuarioBD.getDadosPessoais().getDtCadastro());
+
+        Usuario updatedUsuario = usuarioRepository.save(usuario);
+
+        return modelMapper.map(updatedUsuario, UsuarioOutputDTO.class);
     }
 
     @Transactional
@@ -123,6 +156,7 @@ public class UsuarioService {
 
     public Usuario findById(Long id) {
         Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new NegocioException(HttpStatus.NOT_FOUND));
+        usuario.getDadosPessoais().setFoto(recuperarFoto(usuario.getDadosPessoais().getFoto()));
 
         return usuario;
     }
@@ -133,5 +167,45 @@ public class UsuarioService {
 
         return modelMapper.map(avisos, new TypeToken<List<AvisosDTO>>() {
         }.getType());
+    }
+
+    @Transactional
+    public String upload(Long id, MultipartFile file) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NegocioException(HttpStatus.NOT_FOUND));
+        try {
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(file.getSize());
+            String hashName = DigestUtils.md5Hex(file.getOriginalFilename());
+            usuario.getDadosPessoais().setFoto(hashName);
+            this.amazonS3.putObject(
+                    easyChatProperties.getAws().getBucketName(),
+                    hashName,
+                    file.getInputStream(),
+                    objectMetadata);
+
+            return hashName;
+        } catch (SdkClientException | IOException e) {
+            throw new NegocioException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    private String recuperarFoto(String foto) {
+        if (foto == null) {
+            return null;
+        }
+
+        S3Object object = amazonS3.getObject(easyChatProperties.getAws().getBucketName(), foto);
+        S3ObjectInputStream objectContent = object.getObjectContent();
+
+        try {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            objectContent.transferTo(bytes);
+
+            String base64 = Base64.getEncoder().encodeToString(bytes.toByteArray());
+            return "data:image/jpeg;base64," + base64;
+        } catch (IOException e) {
+            throw new NegocioException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 }
