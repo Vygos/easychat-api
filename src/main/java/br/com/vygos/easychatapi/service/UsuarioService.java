@@ -80,10 +80,17 @@ public class UsuarioService {
 
         usuario.setPassword(usuarioBD.getPassword());
         usuario.getDadosPessoais().setDtCadastro(usuarioBD.getDadosPessoais().getDtCadastro());
+        usuario.getDadosPessoais().setFoto(usuarioBD.getDadosPessoais().getFoto());
 
-        Usuario updatedUsuario = usuarioRepository.save(usuario);
+       usuarioRepository.save(usuario);
 
-        return modelMapper.map(updatedUsuario, UsuarioOutputDTO.class);
+        UsuarioOutputDTO usuarioOutputDTO = modelMapper.map(usuario, UsuarioOutputDTO.class);
+
+        usuarioOutputDTO.getDadosPessoais().setFoto(
+                recuperarFoto(usuario.getDadosPessoais().getFoto())
+        );
+
+        return usuarioOutputDTO;
     }
 
     @Transactional
@@ -190,7 +197,7 @@ public class UsuarioService {
         }
     }
 
-    private String recuperarFoto(String foto) {
+    public String recuperarFoto(String foto) {
         if (foto == null) {
             return null;
         }
